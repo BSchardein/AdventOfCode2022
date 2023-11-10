@@ -11,29 +11,52 @@ import (
 const FILEPATH = "./input.txt"
 
 func main() {
-	maxCals := getMaxCalsFromFile(FILEPATH)
-	fmt.Printf("Most calories: %d", maxCals)
+	top3 := getTop3FromFile(FILEPATH)
+	solvePuzzle1(top3)
+	solvePuzzle2(top3)
 }
 
-func getMaxCalsFromFile(filepath string) int {
-	normalizedInputBody := getFileAsString(filepath)
-	inventories := strings.Split(normalizedInputBody, "\n\n")
-
+func getTop3FromFile(filepath string) [3]int {
+	inventories := getInventoriesFromFile(filepath)
 	log.Printf("There are %d elves with inventories", len(inventories))
-	return getMaxCalories(inventories)
-
+	return getTop3Totals(inventories)
 }
 
-// get max calories from a set of inventories
-func getMaxCalories(inventories []string) int {
-	maxCals := 0
+// print top inventory calorie total
+func solvePuzzle1(top3 [3]int) {
+	maxCals := top3[0]
+	fmt.Printf("Most calories: %d\n", maxCals)
+}
+
+// print sum of top 3 inventory inventory calorie totals
+func solvePuzzle2(top3 [3]int) {
+	totalCals := top3[0] + top3[1] + top3[2]
+	fmt.Printf("Sum of Top 3: %d\n", totalCals)
+}
+
+func getInventoriesFromFile(filepath string) []string {
+	normalizedInputBody := getFileAsString(filepath)
+	return strings.Split(normalizedInputBody, "\n\n")
+}
+
+// get top 3 calorie totals from a set of inventories
+func getTop3Totals(inventories []string) [3]int {
+	var top3 [3]int
+
 	for elfIdx, inventory := range inventories {
 		currCals := getTotalCalories(inventory, elfIdx)
-		if currCals > maxCals {
-			maxCals = currCals
+		if currCals > top3[0] {
+			top3[2] = top3[1]
+			top3[1] = top3[0]
+			top3[0] = currCals
+		} else if currCals > top3[1] {
+			top3[2] = top3[1]
+			top3[1] = currCals
+		} else if currCals > top3[2] {
+			top3[2] = currCals
 		}
 	}
-	return maxCals
+	return top3
 }
 
 // get total calories of all food items in an inventory
